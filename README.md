@@ -2,7 +2,7 @@
 
 Demo of using data from Google Form to populate an website.
 
-[Google Form](https://docs.google.com/forms/d/e/1FAIpQLSd1dCRdCy0rvsOnlYnxv7rAbTDbMm0JMnr9Y6A4R2OSXhQi7w/viewform?usp=header).
+[Google Form](https://docs.google.com/forms/d/e/1FAIpQLSd1dCRdCy0rvsOnlYnxv7rAbTDbMm0JMnr9Y6A4R2OSXhQi7w/viewform?usp=header). [Website](https://wykhuh.github.io/google-forms-demo/)
 
 The app uses vanilla javascript and PapaParse.
 
@@ -18,3 +18,5 @@ The app uses vanilla javascript and PapaParse.
   6. Select "Entire Document" and "Comma-separated values (.csv)"
   7. Click "Publish"
 3. Copy paste "Publish to Web" link to app.js > 'SHEET_URL'
+
+The website will display all the records in the Google Sheets as a table.
