@@ -3,6 +3,10 @@ body {
   font-family: sans-serif;
 }
 
+main {
+  max-width: 1000px;
+}
+
 th,
 td {
   /* border: 1px solid #ccc; */
