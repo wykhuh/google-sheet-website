@@ -1,5 +1,4 @@
-const SHEET_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQEdEfRWnrn8_e-PEao4aS_bvs2xtNGTG6wgdOx2Tnz2O03Vjvm_v8-WJaUDthX6ef0xs47hhReMKHi/pub?output=csv";
+import { sheet_url } from "./config.js";
 
 async function fetchGoogleSheetData(url) {
   let response = await fetch(url);
@@ -50,7 +49,7 @@ function displayData(data, parentElement) {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  let data = await fetchGoogleSheetData(SHEET_URL);
+  let data = await fetchGoogleSheetData(sheet_url);
   let parsedData = parseCSV(data);
 
   let dataDiv = document.getElementById("sheet-data");
