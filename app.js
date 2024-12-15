@@ -49,11 +49,17 @@ function displayData(data, parentElement) {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  let data = await fetchGoogleSheetData(sheet_url);
-  let parsedData = parseCSV(data);
-
   let dataDiv = document.getElementById("sheet-data");
-  if (dataDiv) {
+  let loaderEl = document.getElementById("loader");
+
+  if (dataDiv && loaderEl) {
+    loaderEl.className = "loading";
+
+    let data = await fetchGoogleSheetData(sheet_url);
+    console.log(data);
+    let parsedData = parseCSV(data);
+
+    loaderEl.className = "";
     displayData(parsedData, dataDiv);
   }
 });
