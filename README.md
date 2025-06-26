@@ -20,6 +20,6 @@ The app uses vanilla javascript and PapaParse.
     7. Click "Publish"
 
 3. Connect website to Google Sheets.
-    1. Replace the url (https://docs.google.com/spreadsheets...) in config.js with the "Publish to Web" url.
+    1. Replace the url (https://docs.google.com/spreadsheets...) in src/config.js with the "Publish to Web" url.
 
 The website will display all the records in the Google Sheets as a table.
