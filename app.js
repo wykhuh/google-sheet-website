@@ -43,7 +43,7 @@ function createRow(row) {
 
     if (key === "Timestamp") {
       tdEl.innerText = row[key].split(" ")[0];
-      tdEl.className = "date_added";
+      tdEl.className = "date-added";
     } else {
       tdEl.innerText = row[key];
       tdEl.className = key.replace(" ", "-").toLowerCase();
