@@ -1,16 +1,18 @@
 import { sheet_url } from "./config.js";
 
-async function fetchGoogleSheetData(url) {
-  let response = await fetch(url);
-  return await response.text();
-}
-
-function parseCSV(stringData) {
-  let parsedData = Papa.parse(stringData, { header: true });
-  if (parsedData.errors.length === 0) {
-    return parsedData.data;
-  }
-  return [];
+function getGoogleSheetData(url) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(url, {
+      header: true,
+      download: true,
+      complete(results) {
+        resolve(results.data);
+      },
+      error(err) {
+        reject(err);
+      },
+    });
+  });
 }
 
 let headerClasses = [];
@@ -80,9 +82,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   if (dataDiv && loaderEl) {
     loaderEl.className = "loading";
 
-    let data = await fetchGoogleSheetData(sheet_url);
-    console.log(data);
-    let parsedData = parseCSV(data);
+    let parsedData = await getGoogleSheetData(sheet_url);
 
     loaderEl.className = "";
     displayData(parsedData, dataDiv);
