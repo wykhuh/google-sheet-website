@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="./style.css" />
 
     <script src="./lib/papaparse.min.js"></script>
+    <script src="./lib/list.min.js"></script>
+
     <script src="./app.js" type="module"></script>
   </head>
   <body>
@@ -21,13 +23,14 @@
         submission via Google Forms, refresh this page to see the new record.
       </p>
 
-      <div id="sheet-data"><div id="loader"></div></div>
-    </main>
+      <div id="sheet-data">
+        <div id="loader"></div>
+        <input class="search" placeholder="Search" />
+      </div>
 
-    <footer>
       <p>
         <a href="https://github.com/wykhuh/google-forms-demo">Github repo</a>
       </p>
-    </footer>
+    </main>
   </body>
 </html>

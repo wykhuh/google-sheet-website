@@ -13,12 +13,22 @@ function parseCSV(stringData) {
   return [];
 }
 
+let headerClasses = [];
+
 function createHeaderRow(data) {
   let rowEl = document.createElement("tr");
 
   for (let key in data[0]) {
     let headerEl = document.createElement("th");
-    headerEl.innerText = key === "Timestamp" ? "Date added" : key;
+    let header = key === "Timestamp" ? "Date added" : key;
+    headerEl.innerText = header;
+
+    // add html markup for sortable table
+    let headerClass = header.replace(" ", "-").toLowerCase();
+    headerEl.dataset.sort = headerClass;
+    headerEl.className = "sort";
+    headerClasses.push(headerClass);
+
     rowEl.appendChild(headerEl);
   }
 
@@ -30,7 +40,15 @@ function createRow(row) {
 
   for (let key in row) {
     let tdEl = document.createElement("td");
-    tdEl.innerText = key === "Timestamp" ? row[key].split(" ")[0] : row[key];
+
+    if (key === "Timestamp") {
+      tdEl.innerText = row[key].split(" ")[0];
+      tdEl.className = "date_added";
+    } else {
+      tdEl.innerText = row[key];
+      tdEl.className = key.replace(" ", "-").toLowerCase();
+    }
+
     rowEl.appendChild(tdEl);
   }
 
@@ -41,10 +59,17 @@ function displayData(data, parentElement) {
   let tableEl = document.createElement("table");
   parentElement.appendChild(tableEl);
 
-  tableEl.appendChild(createHeaderRow(data));
+  let theadEl = document.createElement("thead");
+  tableEl.appendChild(theadEl);
+
+  theadEl.appendChild(createHeaderRow(data));
+
+  let tbodyEl = document.createElement("tbody");
+  tbodyEl.className = "list";
+  tableEl.appendChild(tbodyEl);
 
   data.forEach((row) => {
-    tableEl.appendChild(createRow(row));
+    tbodyEl.appendChild(createRow(row));
   });
 }
 
@@ -61,5 +86,11 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     loaderEl.className = "";
     displayData(parsedData, dataDiv);
+
+    // sortable table
+    var options = {
+      valueNames: headerClasses,
+    };
+    new List("sheet-data", options);
   }
 });
