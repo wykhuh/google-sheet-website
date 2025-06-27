@@ -1,5 +1,13 @@
 import { sheet_url } from "./config.js";
 
+let headerClasses = [];
+let allRecords = [];
+let appEl;
+let searchEl;
+let allRecordsEl;
+let showAllEl;
+let oneRecordEl;
+
 function getGoogleSheetData(url) {
   return new Promise((resolve, reject) => {
     Papa.parse(url, {
@@ -15,7 +23,23 @@ function getGoogleSheetData(url) {
   });
 }
 
-let headerClasses = [];
+function createAllRecordsElement(data) {
+  allRecordsEl = document.createElement("table");
+  appEl.appendChild(allRecordsEl);
+
+  let theadEl = document.createElement("thead");
+  allRecordsEl.appendChild(theadEl);
+
+  theadEl.appendChild(createHeaderRow(data));
+
+  let tbodyEl = document.createElement("tbody");
+  tbodyEl.className = "list";
+  allRecordsEl.appendChild(tbodyEl);
+
+  data.forEach((row, i) => {
+    tbodyEl.appendChild(createRow(row, i));
+  });
+}
 
 function createHeaderRow(data) {
   let rowEl = document.createElement("tr");
@@ -33,11 +57,13 @@ function createHeaderRow(data) {
 
     rowEl.appendChild(headerEl);
   }
+  let headerEl = document.createElement("th");
+  rowEl.appendChild(headerEl);
 
   return rowEl;
 }
 
-function createRow(row) {
+function createRow(row, rowIndex) {
   let rowEl = document.createElement("tr");
 
   for (let key in row) {
@@ -54,43 +80,94 @@ function createRow(row) {
     rowEl.appendChild(tdEl);
   }
 
+  let tdEl = document.createElement("td");
+  tdEl.innerText = "show";
+  tdEl.className = "show-record";
+  tdEl.onclick = () => displayOneRecord(rowIndex);
+  rowEl.appendChild(tdEl);
+
   return rowEl;
 }
 
-function displayData(data, parentElement) {
-  let tableEl = document.createElement("table");
-  parentElement.appendChild(tableEl);
+function createShowAllButton() {
+  showAllEl = document.createElement("button");
+  showAllEl.className = "show-all";
+  showAllEl.innerText = "Show all records";
 
-  let theadEl = document.createElement("thead");
-  tableEl.appendChild(theadEl);
+  showAllEl.className = "show-all";
+  showAllEl.onclick = () => displayAllRecords();
 
-  theadEl.appendChild(createHeaderRow(data));
+  appEl.appendChild(showAllEl);
+}
 
-  let tbodyEl = document.createElement("tbody");
-  tbodyEl.className = "list";
-  tableEl.appendChild(tbodyEl);
+function createOneRecordElement(row) {
+  oneRecordEl = document.createElement("table");
+  appEl.appendChild(oneRecordEl);
 
-  data.forEach((row) => {
-    tbodyEl.appendChild(createRow(row));
-  });
+  for (let key in row) {
+    let trEl = document.createElement("tr");
+
+    let thEl = document.createElement("th");
+
+    if (key === "Timestamp") {
+      thEl.innerText = "Date added";
+    } else {
+      thEl.innerText = key;
+    }
+
+    trEl.appendChild(thEl);
+
+    let tdEl = document.createElement("td");
+
+    if (key === "Timestamp") {
+      tdEl.innerText = row[key].split(" ")[0];
+    } else {
+      tdEl.innerText = row[key];
+    }
+
+    trEl.appendChild(tdEl);
+
+    oneRecordEl.appendChild(trEl);
+  }
+}
+
+function displayOneRecord(rowIndex) {
+  if (allRecordsEl) allRecordsEl.classList.add("hidden");
+  if (searchEl) searchEl.classList.add("hidden");
+  if (showAllEl) showAllEl.remove();
+  if (oneRecordEl) oneRecordEl.remove();
+
+  createShowAllButton();
+  createOneRecordElement(allRecords[rowIndex]);
+}
+
+function displayAllRecords() {
+  if (allRecordsEl) allRecordsEl.classList.remove("hidden");
+  if (searchEl) searchEl.classList.remove("hidden");
+  if (showAllEl) showAllEl.remove();
+  if (oneRecordEl) oneRecordEl.remove();
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-  let dataDiv = document.getElementById("sheet-data");
+  appEl = document.getElementById("data-container");
+  searchEl = document.getElementById("search-form");
+
   let loaderEl = document.getElementById("loader");
 
-  if (dataDiv && loaderEl) {
+  if (appEl && loaderEl) {
     loaderEl.className = "loading";
 
-    let parsedData = await getGoogleSheetData(sheet_url);
+    allRecords = await getGoogleSheetData(sheet_url);
+    console.log(allRecords[0]);
 
     loaderEl.className = "";
-    displayData(parsedData, dataDiv);
+    displayAllRecords();
+    createAllRecordsElement(allRecords);
 
     // sortable table
     var options = {
       valueNames: headerClasses,
     };
-    new List("sheet-data", options);
+    new List("data-container", options);
   }
 });

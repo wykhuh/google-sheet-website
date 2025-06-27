@@ -36,10 +36,19 @@ tr:nth-child(even) {
   }
 }
 
-#sheet-data {
+#data-container {
   margin: 2rem 0;
 }
 
-#sheet-data table {
+#data-container table {
   margin-top: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.show-record {
+  text-decoration: underline;
+  cursor: pointer;
 }
