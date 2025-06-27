@@ -1,4 +1,4 @@
-import { sheet_url } from "./config.js";
+import { sheet_url, displayFields } from "./config.js";
 
 let headerClasses = [];
 let allRecords = [];
@@ -7,6 +7,7 @@ let searchEl;
 let allRecordsEl;
 let showAllEl;
 let oneRecordEl;
+let showMore = displayFields.length > 0;
 
 function getGoogleSheetData(url) {
   return new Promise((resolve, reject) => {
@@ -45,6 +46,8 @@ function createHeaderRow(data) {
   let rowEl = document.createElement("tr");
 
   for (let key in data[0]) {
+    if (showMore && !displayFields.includes(key)) continue;
+
     let headerEl = document.createElement("th");
     let header = key === "Timestamp" ? "Date added" : key;
     headerEl.innerText = header;
@@ -57,8 +60,11 @@ function createHeaderRow(data) {
 
     rowEl.appendChild(headerEl);
   }
-  let headerEl = document.createElement("th");
-  rowEl.appendChild(headerEl);
+
+  if (showMore) {
+    let headerEl = document.createElement("th");
+    rowEl.appendChild(headerEl);
+  }
 
   return rowEl;
 }
@@ -67,6 +73,8 @@ function createRow(row, rowIndex) {
   let rowEl = document.createElement("tr");
 
   for (let key in row) {
+    if (showMore && !displayFields.includes(key)) continue;
+
     let tdEl = document.createElement("td");
 
     if (key === "Timestamp") {
@@ -80,11 +88,13 @@ function createRow(row, rowIndex) {
     rowEl.appendChild(tdEl);
   }
 
-  let tdEl = document.createElement("td");
-  tdEl.innerText = "show";
-  tdEl.className = "show-record";
-  tdEl.onclick = () => displayOneRecord(rowIndex);
-  rowEl.appendChild(tdEl);
+  if (showMore) {
+    let tdEl = document.createElement("td");
+    tdEl.innerText = "show";
+    tdEl.className = "show-record";
+    tdEl.onclick = () => displayOneRecord(rowIndex);
+    rowEl.appendChild(tdEl);
+  }
 
   return rowEl;
 }
