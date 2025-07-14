@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "happy-dom": "^18.0.1",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "test": "vitest"
+  }
+}
