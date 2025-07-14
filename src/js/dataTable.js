@@ -39,8 +39,10 @@ function processConfig(configData) {
         break;
       case "title":
         title = row[1].trim();
+        break;
       case "summary":
         summary = row[1].trim();
+        break;
       default:
         break;
     }
