@@ -13,6 +13,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     loaderEl.className = "loading";
 
     let configData = await getConfig();
+    console.log("configData", configData);
     let config = processConfig(configData);
     if (config == undefined) return;
 
