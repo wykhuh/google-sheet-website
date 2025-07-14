@@ -1,2 +1,3 @@
 README.md
-src/lib/*.min.js
+src/**/*.min.js
+src/**/*.min.css
