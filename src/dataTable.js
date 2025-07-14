@@ -10,7 +10,7 @@ let displayFields = [];
 
 function getConfig() {
   return new Promise((resolve, reject) => {
-    Papa.parse("/config.csv", {
+    Papa.parse("./config.csv", {
       header: false,
       download: true,
       complete(results) {
