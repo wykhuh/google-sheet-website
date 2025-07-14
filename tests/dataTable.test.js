@@ -20,6 +20,13 @@ describe("processConfig", () => {
     expect(processConfig(config)).toEqual(expected);
   });
 
+  test("returns undefined if sheetId is missing", () => {
+    let config = [["displayFields", "Aa,Bb,Cc"]];
+    let expected = undefined;
+
+    expect(processConfig(config)).toEqual(expected);
+  });
+
   test("processes config with displayFields", () => {
     let config = [
       ["sheetId", "abc"],
@@ -65,48 +72,6 @@ describe("processConfig", () => {
     expect(processConfig(config)).toEqual(expected);
   });
 
-  test("processes config with sheetId", () => {
-    let config = [["sheetId", "abc"]];
-    let expected = {
-      sheetId: "abc",
-      displayFields: [],
-      title: "",
-      summary: "",
-    };
-
-    expect(processConfig(config)).toEqual(expected);
-  });
-
-  test("processes config with displayFields", () => {
-    let config = [
-      ["sheetId", "abc"],
-      ["displayFields", "Aa,Bb,Cc"],
-    ];
-    let expected = {
-      sheetId: "abc",
-      displayFields: ["Aa", "Bb", "Cc"],
-      title: "",
-      summary: "",
-    };
-
-    expect(processConfig(config)).toEqual(expected);
-  });
-
-  test("processes config with title", () => {
-    let config = [
-      ["sheetId", "abc"],
-      ["title", "my title"],
-    ];
-    let expected = {
-      sheetId: "abc",
-      displayFields: [],
-      title: "my title",
-      summary: "",
-    };
-
-    expect(processConfig(config)).toEqual(expected);
-  });
-
   test("processes config with all fields", () => {
     let config = [
       ["sheetId", "abc"],
@@ -120,13 +85,6 @@ describe("processConfig", () => {
       title: "my title",
       summary: "my summary",
     };
-
-    expect(processConfig(config)).toEqual(expected);
-  });
-
-  test("returns undefined if sheetId is missing", () => {
-    let config = [["displayFields", "Aa,Bb,Cc"]];
-    let expected = undefined;
 
     expect(processConfig(config)).toEqual(expected);
   });
@@ -160,7 +118,7 @@ describe("processAllData", () => {
 });
 
 describe("processListData", () => {
-  test("it returns all the all keys if displayFields is empty", () => {
+  test("returns all key/value pairs if displayFields is empty", () => {
     let data = createRecords();
     let config = {
       displayFields: [],
@@ -170,7 +128,7 @@ describe("processListData", () => {
     expect(processListData(data, config)).toEqual(expected);
   });
 
-  test("it returns keys listed in displayFields if displayFields is set", () => {
+  test("returns key/value pairs listed in displayFields", () => {
     let data = createRecords();
     let config = {
       displayFields: ["last", "first"],

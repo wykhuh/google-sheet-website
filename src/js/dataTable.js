@@ -1,18 +1,22 @@
 let headerClasses = [];
 let allRecords = [];
+let listRecords = [];
 let appEl;
 let searchEl;
 let allRecordsEl;
 let showAllEl;
 let oneRecordEl;
 let showMore;
-let displayFields = [];
 
-function getConfig() {
+//==========================
+// fetch and process CSV
+//==========================
+
+export function getAndParseCSV(url, header = true, download = false) {
   return new Promise((resolve, reject) => {
-    Papa.parse("./config.csv", {
-      header: false,
-      download: true,
+    Papa.parse(url, {
+      header: header,
+      download: download,
       complete(results) {
         resolve(results.data);
       },
@@ -23,7 +27,36 @@ function getConfig() {
   });
 }
 
-function processConfig(configData) {
+export function processListData(data, config) {
+  // use Map instead of object to guarantee order of the keys
+  let listRecords = [];
+
+  if (config.displayFields.length > 0) {
+    data.forEach((row) => {
+      let newRow = new Map();
+      config.displayFields.forEach((field) => {
+        newRow.set(field, row.get(field));
+      });
+      listRecords.push(newRow);
+    });
+  } else {
+    listRecords = data;
+  }
+
+  return listRecords;
+}
+
+export function processAllData(data) {
+  return data.map((row) => {
+    return new Map(Object.entries(row));
+  });
+}
+
+//==========================
+// configuration
+//==========================
+
+export function processConfig(configData) {
   let sheetId;
   let displayFields = [];
   let title = "";
@@ -56,22 +89,27 @@ function processConfig(configData) {
   return { displayFields, sheetId, title, summary };
 }
 
-function getGoogleSheetData(url) {
-  return new Promise((resolve, reject) => {
-    Papa.parse(url, {
-      header: true,
-      download: true,
-      complete(results) {
-        resolve(results.data);
-      },
-      error(err) {
-        reject(err);
-      },
-    });
-  });
+//==========================
+// all records table
+//==========================
+
+export function renderTabularData(data, config) {
+  searchEl = document.getElementById("search-form");
+  if (searchEl == undefined) return;
+
+  appEl = document.getElementById("data-container");
+  if (appEl == undefined) return;
+
+  showMore = config.displayFields.length > 0;
+  allRecords = processAllData(data);
+  listRecords = processListData(allRecords, config);
+
+  displayAllRecords(listRecords);
+
+  addSortableTable();
 }
 
-function createAllRecordsElement(data) {
+function createListTable(data) {
   allRecordsEl = document.createElement("table");
   appEl.appendChild(allRecordsEl);
 
@@ -91,22 +129,20 @@ function createAllRecordsElement(data) {
 
 function createHeaderRow(data) {
   let rowEl = document.createElement("tr");
+  let row = data[0];
 
-  for (let key in data[0]) {
-    if (showMore && !displayFields.includes(key)) continue;
-
+  row.forEach((value, key) => {
     let headerEl = document.createElement("th");
-    let header = key === "Timestamp" ? "Date added" : key;
-    headerEl.innerText = header;
+    headerEl.innerText = key;
 
     // add html markup for sortable table
-    let headerClass = header.replace(" ", "-").toLowerCase();
+    let headerClass = key.replace(" ", "-").toLowerCase();
     headerEl.dataset.sort = headerClass;
     headerEl.className = "sort";
     headerClasses.push(headerClass);
 
     rowEl.appendChild(headerEl);
-  }
+  });
 
   if (showMore) {
     let headerEl = document.createElement("th");
@@ -119,21 +155,13 @@ function createHeaderRow(data) {
 function createRow(row, rowIndex) {
   let rowEl = document.createElement("tr");
 
-  for (let key in row) {
-    if (showMore && !displayFields.includes(key)) continue;
-
+  row.forEach((value, key) => {
     let tdEl = document.createElement("td");
 
-    if (key === "Timestamp") {
-      tdEl.innerText = row[key].split(" ")[0];
-      tdEl.className = "date-added";
-    } else {
-      tdEl.innerText = row[key];
-      tdEl.className = key.replace(" ", "-").toLowerCase();
-    }
-
+    tdEl.innerText = value;
+    tdEl.className = key.replace(" ", "-").toLowerCase();
     rowEl.appendChild(tdEl);
-  }
+  });
 
   if (showMore) {
     let tdEl = document.createElement("td");
@@ -157,47 +185,6 @@ function createShowAllButton() {
   appEl.appendChild(showAllEl);
 }
 
-function createOneRecordElement(row) {
-  oneRecordEl = document.createElement("table");
-  appEl.appendChild(oneRecordEl);
-
-  for (let key in row) {
-    let trEl = document.createElement("tr");
-
-    let thEl = document.createElement("th");
-
-    if (key === "Timestamp") {
-      thEl.innerText = "Date added";
-    } else {
-      thEl.innerText = key;
-    }
-
-    trEl.appendChild(thEl);
-
-    let tdEl = document.createElement("td");
-
-    if (key === "Timestamp") {
-      tdEl.innerText = row[key].split(" ")[0];
-    } else {
-      tdEl.innerText = row[key];
-    }
-
-    trEl.appendChild(tdEl);
-
-    oneRecordEl.appendChild(trEl);
-  }
-}
-
-function displayOneRecord(rowIndex) {
-  if (allRecordsEl) allRecordsEl.classList.add("hidden");
-  if (searchEl) searchEl.classList.add("hidden");
-  if (showAllEl) showAllEl.remove();
-  if (oneRecordEl) oneRecordEl.remove();
-
-  createShowAllButton();
-  createOneRecordElement(allRecords[rowIndex]);
-}
-
 function displayAllRecords(data) {
   if (allRecordsEl) allRecordsEl.classList.remove("hidden");
   if (searchEl) searchEl.classList.remove("hidden");
@@ -205,7 +192,7 @@ function displayAllRecords(data) {
   if (oneRecordEl) oneRecordEl.remove();
 
   if (allRecordsEl == undefined) {
-    createAllRecordsElement(data);
+    createListTable(data);
   }
 }
 
@@ -216,21 +203,44 @@ function addSortableTable() {
   new List("data-container", options);
 }
 
-function renderTabularData(data, configDisplayFields) {
-  showMore = configDisplayFields.length > 0;
-  displayFields = configDisplayFields;
+//==========================
+// one record table
+//==========================
 
-  allRecords = data;
-  searchEl = document.getElementById("search-form");
-  if (searchEl == undefined) return;
+function createDetailsTable(row) {
+  oneRecordEl = document.createElement("table");
+  appEl.appendChild(oneRecordEl);
 
-  appEl = document.getElementById("data-container");
-  if (appEl == undefined) return;
+  row.forEach((value, key) => {
+    let trEl = document.createElement("tr");
 
-  displayAllRecords(allRecords);
+    let thEl = document.createElement("th");
+    thEl.innerText = key;
 
-  addSortableTable();
+    trEl.appendChild(thEl);
+
+    let tdEl = document.createElement("td");
+    tdEl.innerText = value;
+
+    trEl.appendChild(tdEl);
+
+    oneRecordEl.appendChild(trEl);
+  });
 }
+
+function displayOneRecord(rowIndex) {
+  if (allRecordsEl) allRecordsEl.classList.add("hidden");
+  if (searchEl) searchEl.classList.add("hidden");
+  if (showAllEl) showAllEl.remove();
+  if (oneRecordEl) oneRecordEl.remove();
+
+  createShowAllButton();
+  createDetailsTable(allRecords[rowIndex]);
+}
+
+//==========================
+// misc
+//==========================
 
 function renderError(error) {
   appEl = document.getElementById("data-container");
@@ -239,7 +249,7 @@ function renderError(error) {
   appEl.classList.add("error");
 }
 
-function renderPageIntro(configData) {
+export function renderPageIntro(configData) {
   if (configData.title) {
     let titleEl = document.querySelector(".title");
     if (titleEl) {
@@ -253,11 +263,3 @@ function renderPageIntro(configData) {
     }
   }
 }
-
-export {
-  getGoogleSheetData,
-  getConfig,
-  processConfig,
-  renderTabularData,
-  renderPageIntro,
-};
