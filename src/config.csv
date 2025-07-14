@@ -1,0 +1,4 @@
+sheetId,2PACX-1vQEdEfRWnrn8_e-PEao4aS_bvs2xtNGTG6wgdOx2Tnz2O03Vjvm_v8-WJaUDthX6ef0xs47hhReMKHi
+title,Google Forms Demo
+summary,"Demo of using data from Google Form to populate an website. Form link: https://forms.gle/u3bPyFid8vTFpHR7A. You can fill out the form without a Google account. If you add a new  submission via Google Forms, refresh this page to see the new record."
+displayFields,"Book title,Authors"

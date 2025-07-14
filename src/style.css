@@ -52,3 +52,7 @@ tr:nth-child(even) {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.error {
+  color: red;
+}

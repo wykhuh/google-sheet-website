@@ -1,5 +1,3 @@
-import { displayFields } from "./config.js";
-
 let headerClasses = [];
 let allRecords = [];
 let appEl;
@@ -7,7 +5,54 @@ let searchEl;
 let allRecordsEl;
 let showAllEl;
 let oneRecordEl;
-let showMore = displayFields.length > 0;
+let showMore;
+let displayFields = [];
+
+function getConfig() {
+  return new Promise((resolve, reject) => {
+    Papa.parse("/config.csv", {
+      header: false,
+      download: true,
+      complete(results) {
+        resolve(results.data);
+      },
+      error(err) {
+        reject(err);
+      },
+    });
+  });
+}
+
+function processConfig(configData) {
+  let sheetId;
+  let displayFields = [];
+  let title = "";
+  let summary = "";
+
+  configData.forEach((row) => {
+    switch (row[0]) {
+      case "sheetId":
+        sheetId = row[1].trim();
+        break;
+      case "displayFields":
+        displayFields = row[1].split(",").map((field) => field.trim());
+        break;
+      case "title":
+        title = row[1].trim();
+      case "summary":
+        summary = row[1].trim();
+      default:
+        break;
+    }
+  });
+
+  if (sheetId == undefined) {
+    renderError("sheetId must be present in config.csv");
+    return;
+  }
+
+  return { displayFields, sheetId, title, summary };
+}
 
 function getGoogleSheetData(url) {
   return new Promise((resolve, reject) => {
@@ -169,7 +214,10 @@ function addSortableTable() {
   new List("data-container", options);
 }
 
-function init(data) {
+function renderTabularData(data, configDisplayFields) {
+  showMore = configDisplayFields.length > 0;
+  displayFields = configDisplayFields;
+
   allRecords = data;
   searchEl = document.getElementById("search-form");
   if (searchEl == undefined) return;
@@ -182,4 +230,32 @@ function init(data) {
   addSortableTable();
 }
 
-export { getGoogleSheetData, init };
+function renderError(error) {
+  appEl = document.getElementById("data-container");
+  if (appEl == undefined) return;
+  appEl.innerText = error;
+  appEl.classList.add("error");
+}
+
+function renderPageIntro(configData) {
+  if (configData.title) {
+    let titleEl = document.querySelector(".title");
+    if (titleEl) {
+      titleEl.textContent = configData.title;
+    }
+  }
+  if (configData.summary) {
+    let summaryEl = document.querySelector(".summary");
+    if (summaryEl) {
+      summaryEl.innerText = configData.summary;
+    }
+  }
+}
+
+export {
+  getGoogleSheetData,
+  getConfig,
+  processConfig,
+  renderTabularData,
+  renderPageIntro,
+};
